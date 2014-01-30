@@ -4,8 +4,8 @@
 import cairo,Image
 from operator import itemgetter
 import numpy as np
-from numpy import sin, cos, pi, arctan2, sqrt, logical_not
-from numpy.random import random
+from numpy import sin, cos, pi, arctan2, square,sqrt, logical_not, linspace, array
+from numpy.random import random, randint
 import gtk, gobject
 
 
@@ -13,17 +13,19 @@ PI = pi
 PII = PI*2.
 
 N = 800 # size of png image
-NUM = 100 # number of nodes
+NUM = 200 # number of nodes
 BACK = 1. # background color 
-RAD = 0.2 # radius of starting circle
-GRAINS = 150
+GRAINS = 50
 STP = 0.001 # scale motion in each iteration by this
-MAXFS = 50 # max friendships pr node
+MAXFS = 3 # max friendships pr node
 ALPHA = 0.05 # opacity of drawn points
 ONE = 1./N
 
-FARL  = 0.15
-NEARL = 0.02
+RAD = 0.25 # radius of starting circle
+FARL  = 0.14 # ignore "enimies" beyond this radius
+NEARL = 0.04 # do not attempt to approach friends close than this
+
+FRIENDSHIP_RATIO = 0.5 # probability of frindship attempt
 
 
 class Render(object):
@@ -93,34 +95,44 @@ class Render(object):
     for i in xrange(NUM):
       dx = self.X[i] - self.X
       dy = self.Y[i] - self.Y
-      self.R[i,:] = sqrt(dx*dx+dy*dy)
+      self.R[i,:] = square(dx)+square(dy)
       self.A[i,:] = arctan2(dy,dx)
 
+    sqrt(self.R,self.R)
+
   def make_friends(self,i):
+
+    cand_num = self.F.sum(axis=1)
     
-    if self.F[i,:].sum() > MAXFS:
+    if cand_num[i]>=MAXFS:
       return
 
-    r = []
-    for j in xrange(NUM):
-      if i != j and self.F[j,:].sum() < MAXFS\
-        and not self.F[j,i]:
-          r.append((self.R[i,j],j))
-    if not len(r):
-      return
-    r = sorted(r, key=itemgetter(0))
+    cand_mask = cand_num<MAXFS
+    cand_mask[i] = False
+    cand_ind = cand_mask.nonzero()[0]
 
-    index = len(r)-1
-    for k in xrange(len(r)):
+    cand_dist = self.R[i,cand_ind].flatten()
+    cand_sorted_dist = cand_dist.argsort()
+    cand_ind = cand_ind[cand_sorted_dist]
+
+    cand_n = len(cand_ind)
+
+    if cand_n<1:
+      return
+
+    #j = randint(cand_n)
+    #limit = 1.-(float(j)/cand_n)**2
+    #draw = random()
+
+    for k in xrange(cand_n):
+
       if random() < 0.1:
-        index = k
-        break
 
-    self.F[i,r[index][1]] = True
-    self.F[r[index][1],i] = True
-    return
+        j = cand_ind[k]
+        self.F[[i,j],[j,i]] = True
+        return
 
-  def render_connection_points(self):
+  def render_connections(self):
 
     self.ctx.set_source_rgba(0,0,0,ALPHA)
 
@@ -164,9 +176,11 @@ class Render(object):
     self.X += self.SX*STP
     self.Y += self.SY*STP
 
-    self.make_friends(int(random()*NUM))
+    #if random()<FRIENDSHIP_RATIO:
+    i = randint(NUM)
+    self.make_friends(i)
 
-    self.render_connection_points()
+    self.render_connections()
 
     return True
 
