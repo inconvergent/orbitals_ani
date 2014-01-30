@@ -22,10 +22,13 @@ ALPHA = 0.05 # opacity of drawn points
 ONE = 1./N
 
 RAD = 0.25 # radius of starting circle
-FARL  = 0.14 # ignore "enimies" beyond this radius
+FARL  = 0.15 # ignore "enemies" beyond this radius
 NEARL = 0.04 # do not attempt to approach friends close than this
 
-FRIENDSHIP_RATIO = 0.07 # probability of friendship dens
+UPDATE_NUM = 1 # dump every UPDATE_NUM iteration to file
+
+FRIENDSHIP_RATIO = 0.1 # probability of friendship dens
+FRIENDSHIP_INITIATE_PROB = 1. # probability of friendship initation attempt
 
 
 class Render(object):
@@ -44,6 +47,9 @@ class Render(object):
     window.show_all()
 
     self.darea = darea
+
+    self.num_img = 0
+    self.itt = 0
 
     gobject.idle_add(self.step_wrap)
     gtk.main()
@@ -85,8 +91,12 @@ class Render(object):
 
   def step_wrap(self,*args):
 
-    res = self.step()
-    self.expose()
+    res, added_new = self.step()
+
+    if not self.itt%UPDATE_NUM:
+      self.expose()
+      #self.sur.write_to_png('image{:05d}.png'.format(self.num_img))
+      #self.num_img+=1
 
     return res
 
@@ -148,6 +158,8 @@ class Render(object):
 
   def step(self):
 
+    self.itt+=1
+
     self.set_distances()
     
     self.SX[:] = 0.
@@ -174,11 +186,12 @@ class Render(object):
     self.Y += self.SY*STP
 
     i = randint(NUM)
-    self.make_friends(i)
+    if random()<FRIENDSHIP_INITIATE_PROB:
+      self.make_friends(i)
 
     self.render_connections()
 
-    return True
+    return True, True
 
 def main():
 
