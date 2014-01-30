@@ -15,7 +15,7 @@ PII = PI*2.
 N = 800 # size of png image
 NUM = 200 # number of nodes
 BACK = 1. # background color 
-GRAINS = 50
+GRAINS = 30
 STP = 0.001 # scale motion in each iteration by this
 MAXFS = 3 # max friendships pr node
 ALPHA = 0.05 # opacity of drawn points
@@ -25,7 +25,7 @@ RAD = 0.25 # radius of starting circle
 FARL  = 0.14 # ignore "enimies" beyond this radius
 NEARL = 0.04 # do not attempt to approach friends close than this
 
-FRIENDSHIP_RATIO = 0.5 # probability of frindship attempt
+FRIENDSHIP_RATIO = 0.07 # probability of friendship dens
 
 
 class Render(object):
@@ -120,16 +120,13 @@ class Render(object):
     if cand_n<1:
       return
 
-    #j = randint(cand_n)
-    #limit = 1.-(float(j)/cand_n)**2
-    #draw = random()
-
     for k in xrange(cand_n):
 
-      if random() < 0.1:
+      if random()<FRIENDSHIP_RATIO:
 
         j = cand_ind[k]
         self.F[[i,j],[j,i]] = True
+
         return
 
   def render_connections(self):
@@ -176,7 +173,6 @@ class Render(object):
     self.X += self.SX*STP
     self.Y += self.SY*STP
 
-    #if random()<FRIENDSHIP_RATIO:
     i = randint(NUM)
     self.make_friends(i)
 
