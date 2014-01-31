@@ -8,12 +8,15 @@ from numpy import sin, cos, pi, arctan2, square,sqrt, logical_not, linspace, arr
 from numpy.random import random, randint
 import gtk, gobject
 
+## comment out to get new results on each run
+np.random.seed(1)
+
 
 PI = pi
 PII = PI*2.
 
 N = 1080 # size of png image
-NUM = 300 # number of nodes
+NUM = 200 # number of nodes
 BACK = 1. # background color 
 GRAINS = 5
 STP = 0.0001 # scale motion in each iteration by this
@@ -21,17 +24,19 @@ MAXFS = 5 # max friendships pr node
 ALPHA = 0.05 # opacity of drawn points
 ONE = 1./N
 
-RAD = 0.25 # radius of starting circle
+RAD = 0.20 # radius of starting circle
 FARL  = 0.13 # ignore "enemies" beyond this radius
 NEARL = 0.02 # do not attempt to approach friends close than this
 
-UPDATE_NUM = 10 # dump every UPDATE_NUM iteration to file
+UPDATE_NUM = 40 # dump every UPDATE_NUM iteration to file
+#UPDATE_NUM = 10 # dump every UPDATE_NUM iteration to file
 
 FRIENDSHIP_RATIO = 0.1 # probability of friendship dens
-FRIENDSHIP_INITIATE_PROB = 0.4 # probability of friendship initation attempt
+FRIENDSHIP_INITIATE_PROB = 0.1 # probability of friendship initation attempt
 
 COLOR_PATH = 'color/dark_cyan_white_black.gif'
 
+ANGULAR_NOISE = PII/50.
 
 class Render(object):
 
@@ -205,10 +210,19 @@ class Render(object):
       far[i] = False
       speed = FARL - d[far]
 
-      self.SX[near] += cos(a[near])
-      self.SY[near] += sin(a[near])
-      self.SX[far] -= speed*cos(a[far])
-      self.SY[far] -= speed*sin(a[far])
+      noise_far_a = 0.
+      noise_near_a = 0.
+
+      ## adds noise. can be commented out
+      #noise_near_a = (1.-2.*random(near.sum()))*ANGULAR_NOISE
+      #noise_far_a = (1.-2.*random(far.sum()))*ANGULAR_NOISE
+
+      self.SX[near] += cos(a[near] + noise_near_a)
+      self.SY[near] += sin(a[near] + noise_near_a)
+
+      self.SX[far] -= speed*cos(a[far] + noise_far_a)
+      self.SY[far] -= speed*sin(a[far] + noise_far_a)
+
 
     self.X += self.SX*STP
     self.Y += self.SY*STP
