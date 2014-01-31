@@ -12,23 +12,25 @@ import gtk, gobject
 PI = pi
 PII = PI*2.
 
-N = 800 # size of png image
-NUM = 200 # number of nodes
+N = 1080 # size of png image
+NUM = 300 # number of nodes
 BACK = 1. # background color 
-GRAINS = 30
-STP = 0.001 # scale motion in each iteration by this
-MAXFS = 3 # max friendships pr node
+GRAINS = 5
+STP = 0.0001 # scale motion in each iteration by this
+MAXFS = 5 # max friendships pr node
 ALPHA = 0.05 # opacity of drawn points
 ONE = 1./N
 
 RAD = 0.25 # radius of starting circle
-FARL  = 0.15 # ignore "enemies" beyond this radius
-NEARL = 0.04 # do not attempt to approach friends close than this
+FARL  = 0.13 # ignore "enemies" beyond this radius
+NEARL = 0.02 # do not attempt to approach friends close than this
 
-UPDATE_NUM = 1 # dump every UPDATE_NUM iteration to file
+UPDATE_NUM = 10 # dump every UPDATE_NUM iteration to file
 
 FRIENDSHIP_RATIO = 0.1 # probability of friendship dens
-FRIENDSHIP_INITIATE_PROB = 1. # probability of friendship initation attempt
+FRIENDSHIP_INITIATE_PROB = 0.4 # probability of friendship initation attempt
+
+COLOR_PATH = 'color/dark_cyan_white_black.gif'
 
 
 class Render(object):
@@ -37,6 +39,7 @@ class Render(object):
 
     self.__init_cairo()
     self.__init_data()
+    self.__get_colors(COLOR_PATH)
 
     window = gtk.Window()
     window.resize(N,N)
@@ -53,6 +56,8 @@ class Render(object):
 
     gobject.idle_add(self.step_wrap)
     gtk.main()
+
+    self.__get_colors(COLOR_PATH)
 
   def __init_data(self):
 
@@ -83,6 +88,21 @@ class Render(object):
     self.sur = sur
     self.ctx = ctx
 
+  def __get_colors(self,f):
+    scale = 1./255.
+    im = Image.open(f)
+    w,h = im.size
+    rgbim = im.convert('RGB')
+    res = []
+    for i in xrange(0,w):
+      for j in xrange(0,h):
+        r,g,b = rgbim.getpixel((i,j))
+        res.append((r*scale,g*scale,b*scale))
+
+    np.random.shuffle(res)
+    self.colors = res
+    self.n_colors = len(res)
+
   def expose(self,*args):
 
     cr = self.darea.window.cairo_create()
@@ -95,8 +115,12 @@ class Render(object):
 
     if not self.itt%UPDATE_NUM:
       self.expose()
-      #self.sur.write_to_png('image{:05d}.png'.format(self.num_img))
+
+      ## write frames to file:
+      #fn = 'image{:05d}.png'.format(self.num_img)
+      #self.sur.write_to_png(fn)
       #self.num_img+=1
+      #print fn
 
     return res
 
@@ -136,12 +160,12 @@ class Render(object):
 
         j = cand_ind[k]
         self.F[[i,j],[j,i]] = True
-
         return
 
   def render_connections(self):
 
-    self.ctx.set_source_rgba(0,0,0,ALPHA)
+    # everything is black
+    #self.ctx.set_source_rgba(0,0,0,ALPHA)
 
     indsx,indsy = self.F.nonzero()
     mask = indsx >= indsy 
@@ -151,6 +175,10 @@ class Render(object):
       scales = np.random.random(GRAINS)*d
       xp = self.X[i] - scales*cos(a)
       yp = self.Y[i] - scales*sin(a)
+     
+      # colors. wooo!
+      r,g,b = self.colors[ (i*N+j) % self.n_colors ]
+      self.ctx.set_source_rgba(r,g,b,ALPHA)
 
       for x,y in zip(xp,yp):
         self.ctx.rectangle(x,y,ONE,ONE)
