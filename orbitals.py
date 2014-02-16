@@ -182,7 +182,7 @@ class Render(object):
       yp = self.Y[i] - scales*sin(a)
      
       # colors. wooo!
-      r,g,b = self.colors[ (i*N+j) % self.n_colors ]
+      r,g,b = self.colors[ (i*NUM+j) % self.n_colors ]
       self.ctx.set_source_rgba(r,g,b,ALPHA)
 
       for x,y in zip(xp,yp):
