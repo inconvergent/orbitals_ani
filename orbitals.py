@@ -34,7 +34,7 @@ UPDATE_NUM = 40 # dump every UPDATE_NUM iteration to file
 FRIENDSHIP_RATIO = 0.1 # probability of friendship dens
 FRIENDSHIP_INITIATE_PROB = 0.1 # probability of friendship initation attempt
 
-COLOR_PATH = 'color/dark_cyan_white_black.gif'
+#COLOR_PATH = '../colors/dark_cyan_white_black.gif'
 
 ANGULAR_NOISE = PII/50.
 
@@ -44,7 +44,9 @@ class Render(object):
 
     self.__init_cairo()
     self.__init_data()
-    self.__get_colors(COLOR_PATH)
+    #self.__get_colors(COLOR_PATH)
+    self.colors = [[0,0,0]]
+    self.n_colors = 1
 
     window = gtk.Window()
     window.resize(N,N)
