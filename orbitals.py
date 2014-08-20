@@ -17,7 +17,7 @@ PII = PI*2.
 
 N = 1080 # size of png image
 NUM = 200 # number of nodes
-BACK = 1. # background color 
+BACK = 1. # background color
 GRAINS = 5
 STP = 0.0001 # scale motion in each iteration by this
 MAXFS = 5 # max friendships pr node
@@ -144,7 +144,7 @@ class Render(object):
   def make_friends(self,i):
 
     cand_num = self.F.sum(axis=1)
-    
+
     if cand_num[i]>=MAXFS:
       return
 
@@ -175,14 +175,14 @@ class Render(object):
     #self.ctx.set_source_rgba(0,0,0,ALPHA)
 
     indsx,indsy = self.F.nonzero()
-    mask = indsx >= indsy 
+    mask = indsx >= indsy
     for i,j in zip(indsx[mask],indsy[mask]):
       a = self.A[i,j]
       d = self.R[i,j]
       scales = np.random.random(GRAINS)*d
       xp = self.X[i] - scales*cos(a)
       yp = self.Y[i] - scales*sin(a)
-     
+
       # colors. wooo!
       r,g,b = self.colors[ (i*NUM+j) % self.n_colors ]
       self.ctx.set_source_rgba(r,g,b,ALPHA)
@@ -196,10 +196,10 @@ class Render(object):
     self.itt+=1
 
     self.set_distances()
-    
+
     self.SX[:] = 0.
     self.SY[:] = 0.
-    
+
     for i in xrange(NUM):
       xF = logical_not(self.F[i,:])
       d = self.R[i,:]
@@ -240,7 +240,7 @@ class Render(object):
 def main():
 
   render = Render()
-  
+
 
 if __name__ == '__main__' :
   main()
