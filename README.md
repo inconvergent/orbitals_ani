@@ -1,10 +1,21 @@
-about orbitals\_ani
+Orbitals
 =============
 
-animation of the orbitals algorithm.
+Orbitals is inspired by the naive optimization process that Jared Tarbell has
+implemented in his
+"[http://www.complexification.net/gallery/machines/happyPlace/index.php](Happy
+Place)" algorithm. Nodes are created in some, more or less structured
+arangement, before they start to make friends with their neighbors. Gradually
+the nodes make an effort to get closer to their friends, whilst at the same
+time keeping a comfortable distance from the nodes they have not befriended.
+The visualization is made by drawing lines betweeen pairs of friends as they
+walk around the canvas. Thus the final image is a history of all the
+friendships.
 
-based on http://www.complexification.net/gallery/machines/happyPlace/index.php
+This is an animated version and it is very slow.
+[https://github.com/inconvergent/orbitals](Here) is a faster version. 
 
+![orbitals](http://inconvergent.net/xstatic/img-content/orbitals_ba.jpg "orbitals")
 
-----
-Anders Hoff 2014
+-----------
+http://inconvergent.net
